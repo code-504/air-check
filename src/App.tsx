@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Doughnut, Line } from 'react-chartjs-2';
 import { useEffect, useState } from "react"
 import zoomPlugin from 'chartjs-plugin-zoom';
+import regression from 'regression';
+
 import {
   Select,
   SelectContent,
@@ -243,11 +245,22 @@ export default function App() {
         const VOCsAI: number[] = [];
         const presssAI: number[] = [];
 
+        // Proyección Data
+        const iaqsPro: number[] = [];
+        const tempsPro: number[] = [];
+        const humsPro: number[] = [];
+        const CO2sPro: number[] = [];
+        const VOCsPro: number[] = [];
+        const presssPro: number[] = [];
+
         // normal label
         const labels: string[] = [];
 
         // AI label
         const labelsAI: string[] = [];
+
+        // Proyeccion label
+        const labelsPro: string[] = [];
       
         // Normal data push
         const promedio = calcularPromedioPorDia(snapshot)
@@ -279,12 +292,56 @@ export default function App() {
           //labels.push(Moment(fecha).format('MMM DD'));
 
           iaqsAI.push(iaq);
-            tempsAI.push(temp);
-            humsAI.push(hum);
-            CO2sAI.push(CO2);
-            VOCsAI.push(VOC);
-            presssAI.push(press);
-            labelsAI.push(Moment(fecha).format('MMM DD'));
+          tempsAI.push(temp);
+          humsAI.push(hum);
+          CO2sAI.push(CO2);
+          VOCsAI.push(VOC);
+          presssAI.push(press);
+          labelsAI.push(Moment(fecha).format('MMM DD'));
+          labelsPro.push(Moment(fecha).format('MMM DD'));
+
+          let data = labelsAI.map((label, index) => [index, iaqsAI[index]]);
+          let result = regression.linear(data, { order: 2 });
+          let [m, b] = result.equation;
+          let futureIndex = data.length + 10;
+          let projectedValue = m * futureIndex + b;
+          iaqsPro.push(projectedValue);
+
+          data = labelsAI.map((label, index) => [index, tempsAI[index]]);
+          result = regression.linear(data, { order: 2 });
+          [m, b] = result.equation;
+          futureIndex = data.length + 10;
+          projectedValue = m * futureIndex + b;
+          tempsPro.push(projectedValue);
+
+          data = labelsAI.map((label, index) => [index, humsAI[index]]);
+          result = regression.linear(data, { order: 2 });
+          [m, b] = result.equation;
+          futureIndex = data.length + 10;
+          projectedValue = m * futureIndex + b;
+          humsPro.push(projectedValue);
+
+          data = labelsAI.map((label, index) => [index, CO2sAI[index]]);
+          result = regression.linear(data, { order: 2 });
+          [m, b] = result.equation;
+          futureIndex = data.length + 10;
+          projectedValue = m * futureIndex + b;
+          CO2sPro.push(projectedValue);
+
+          data = labelsAI.map((label, index) => [index, VOCsAI[index]]);
+          result = regression.linear(data, { order: 2 });
+          [m, b] = result.equation;
+          futureIndex = data.length + 10;
+          projectedValue = m * futureIndex + b;
+          VOCsPro.push(projectedValue);
+
+          data = labelsAI.map((label, index) => [index, presssAI[index]]);
+          result = regression.linear(data, { order: 2 });
+          [m, b] = result.equation;
+          futureIndex = data.length + 10;
+          projectedValue = m * futureIndex + b;
+          presssPro.push(projectedValue);
+
         });
 
         console.log(iaqsAI)
@@ -368,6 +425,31 @@ export default function App() {
               },
               tension: 0.5,
             },
+            {
+              label: 'Proyección',
+              data: iaqsPro,
+              fill: true,
+              borderColor: '#000000',
+              backgroundColor: (context:any) => {
+                const bgColor = [
+                  'rgba(0, 0, 0, 0.3)',
+                  'rgba(0, 0, 0, 0)'
+                ];
+
+                if (!context.chart.chartArea) {
+                  return;
+                }
+
+                const { ctx, chartArea: { top, bottom } } = context.chart;
+
+                const gradientBg = ctx.createLinearGradient(0, top, 0, bottom);
+                gradientBg.addColorStop(0, bgColor[0])
+                gradientBg.addColorStop(1, bgColor[1])
+
+                return gradientBg;
+              },
+              tension: 0.5,
+            }
           ],
         });
 
@@ -424,6 +506,31 @@ export default function App() {
               },
               tension: 0.5,
             },
+            {
+              label: 'Proyección',
+              data: tempsPro,
+              fill: true,
+              borderColor: '#000000',
+              backgroundColor: (context:any) => {
+                const bgColor = [
+                  'rgba(0, 0, 0, 0.3)',
+                  'rgba(0, 0, 0, 0)'
+                ];
+
+                if (!context.chart.chartArea) {
+                  return;
+                }
+
+                const { ctx, chartArea: { top, bottom } } = context.chart;
+
+                const gradientBg = ctx.createLinearGradient(0, top, 0, bottom);
+                gradientBg.addColorStop(0, bgColor[0])
+                gradientBg.addColorStop(1, bgColor[1])
+
+                return gradientBg;
+              },
+              tension: 0.5,
+            }
           ],
         });
 
@@ -480,6 +587,31 @@ export default function App() {
               },
               tension: 0.5,
             },
+            {
+              label: 'Proyección',
+              data: humsPro,
+              fill: true,
+              borderColor: '#000000',
+              backgroundColor: (context:any) => {
+                const bgColor = [
+                  'rgba(0, 0, 0, 0.3)',
+                  'rgba(0, 0, 0, 0)'
+                ];
+
+                if (!context.chart.chartArea) {
+                  return;
+                }
+
+                const { ctx, chartArea: { top, bottom } } = context.chart;
+
+                const gradientBg = ctx.createLinearGradient(0, top, 0, bottom);
+                gradientBg.addColorStop(0, bgColor[0])
+                gradientBg.addColorStop(1, bgColor[1])
+
+                return gradientBg;
+              },
+              tension: 0.5,
+            }
           ],
         });
 
@@ -536,6 +668,31 @@ export default function App() {
               },
               tension: 0.5,
             },
+            {
+              label: 'Proyección',
+              data: CO2sPro,
+              fill: true,
+              borderColor: '#000000',
+              backgroundColor: (context:any) => {
+                const bgColor = [
+                  'rgba(0, 0, 0, 0.3)',
+                  'rgba(0, 0, 0, 0)'
+                ];
+
+                if (!context.chart.chartArea) {
+                  return;
+                }
+
+                const { ctx, chartArea: { top, bottom } } = context.chart;
+
+                const gradientBg = ctx.createLinearGradient(0, top, 0, bottom);
+                gradientBg.addColorStop(0, bgColor[0])
+                gradientBg.addColorStop(1, bgColor[1])
+
+                return gradientBg;
+              },
+              tension: 0.5,
+            }
           ],
         });
 
@@ -592,6 +749,31 @@ export default function App() {
               },
               tension: 0.5,
             },
+            {
+              label: 'Proyección',
+              data: VOCsPro,
+              fill: true,
+              borderColor: '#000000',
+              backgroundColor: (context:any) => {
+                const bgColor = [
+                  'rgba(0, 0, 0, 0.3)',
+                  'rgba(0, 0, 0, 0)'
+                ];
+
+                if (!context.chart.chartArea) {
+                  return;
+                }
+
+                const { ctx, chartArea: { top, bottom } } = context.chart;
+
+                const gradientBg = ctx.createLinearGradient(0, top, 0, bottom);
+                gradientBg.addColorStop(0, bgColor[0])
+                gradientBg.addColorStop(1, bgColor[1])
+
+                return gradientBg;
+              },
+              tension: 0.5,
+            }
           ],
         });
 
@@ -648,6 +830,31 @@ export default function App() {
               },
               tension: 0.5,
             },
+            {
+              label: 'Proyección',
+              data: presssPro,
+              fill: true,
+              borderColor: '#000000',
+              backgroundColor: (context:any) => {
+                const bgColor = [
+                  'rgba(0, 0, 0, 0.3)',
+                  'rgba(0, 0, 0, 0)'
+                ];
+
+                if (!context.chart.chartArea) {
+                  return;
+                }
+
+                const { ctx, chartArea: { top, bottom } } = context.chart;
+
+                const gradientBg = ctx.createLinearGradient(0, top, 0, bottom);
+                gradientBg.addColorStop(0, bgColor[0])
+                gradientBg.addColorStop(1, bgColor[1])
+
+                return gradientBg;
+              },
+              tension: 0.5,
+            }
           ],
         });
       } catch (error) {
